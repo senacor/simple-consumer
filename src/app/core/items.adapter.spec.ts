@@ -1,8 +1,8 @@
 import {TestBed} from '@angular/core/testing';
-import {ItemsAdapter} from "./items.adapter";
-import {HttpClientTestingModule, HttpTestingController} from "@angular/common/http/testing";
-import {AppConfig} from "./model/app-config.model";
-import {Item} from "./model/item.model";
+import {ItemsAdapter} from './items.adapter';
+import {HttpClientTestingModule, HttpTestingController} from '@angular/common/http/testing';
+import {AppConfig} from './model/app-config.model';
+import {Item} from './model/item.model';
 
 describe('ItemsAdapter', () => {
   let subject: ItemsAdapter;
@@ -14,19 +14,19 @@ describe('ItemsAdapter', () => {
         items: 'http://host:1234/items'
       }
     } as AppConfig
-  }
+  };
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [{provide: 'Window', useValue: windowMock}],
       imports: [HttpClientTestingModule]
     });
-    subject = TestBed.inject(ItemsAdapter)
+    subject = TestBed.inject(ItemsAdapter);
     httpMock = TestBed.inject(HttpTestingController);
   });
 
   it('should be created', () => {
-    expect(subject).toBeTruthy()
+    expect(subject).toBeTruthy();
   });
 
   it('#get() works w/ name param', () => {

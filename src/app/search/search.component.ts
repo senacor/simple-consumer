@@ -1,9 +1,9 @@
 import {Component} from '@angular/core';
-import {ItemsAdapter} from "../core/items.adapter";
-import {FormBuilder, FormGroup} from "@angular/forms";
-import {debounce, filter, first} from "rxjs/operators";
-import {interval, Subscription} from "rxjs";
-import {Item} from "../core/model/item.model";
+import {ItemsAdapter} from '../core/items.adapter';
+import {FormBuilder, FormGroup} from '@angular/forms';
+import {debounce, filter, first} from 'rxjs/operators';
+import {interval, Subscription} from 'rxjs';
+import {Item} from '../core/model/item.model';
 
 @Component({
   selector: 'app-search',
@@ -14,22 +14,22 @@ export class SearchComponent {
 
   readonly form: FormGroup;
   subscriptions: Subscription[] = [];
-  searchResult: Item[] = []
+  searchResult: Item[] = [];
 
   constructor(fb: FormBuilder, private items: ItemsAdapter) {
     this.form = fb.group({
       name: ''
-    })
+    });
     this.subscriptions.push(
       this.form.controls.name.valueChanges
         .pipe(
           filter(_ => _.length > 2),
           debounce(() => interval(300)))
         .subscribe(this.search)
-    )
+    );
   }
 
-  onSearch = () => this.search(this.form.controls.name.value || null)
+  onSearch = () => this.search(this.form.controls.name.value || null);
 
   private search = (value: string | null = null) =>
     this.items.get(value)

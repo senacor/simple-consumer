@@ -3,9 +3,9 @@ import {CommonModule} from '@angular/common';
 
 import {SearchRoutingModule} from './search-routing.module';
 import {SearchComponent} from './search.component';
-import {HttpClientModule} from "@angular/common/http";
-import {CoreModule} from "../core/core.module";
-import {ReactiveFormsModule} from "@angular/forms";
+import {HttpClientModule} from '@angular/common/http';
+import {CoreModule} from '../core/core.module';
+import {ReactiveFormsModule} from '@angular/forms';
 
 
 @NgModule({

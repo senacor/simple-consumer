@@ -1,10 +1,10 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {SearchComponent} from './search.component';
-import {ReactiveFormsModule} from "@angular/forms";
-import {ItemsAccess, ItemsAdapter} from "../core/items.adapter";
-import {of} from "rxjs";
-import {Item} from "../core/model/item.model";
+import {ReactiveFormsModule} from '@angular/forms';
+import {ItemsAccess, ItemsAdapter} from '../core/items.adapter';
+import {of} from 'rxjs';
+import {Item} from '../core/model/item.model';
 
 describe('SearchComponent', () => {
   let subject: SearchComponent;
@@ -13,10 +13,8 @@ describe('SearchComponent', () => {
 
   const items = (name: string| null) => [{name: name || 'null', available: 1, price: 1.99} as Item];
   const itemsAdapterMock: ItemsAccess = {
-    get: (name: string | null) => {
-      return of(items(name))
-    }
-  }
+    get: (name: string | null) => of(items(name))
+  };
 
   beforeEach(async () => {
     adapterSpy = spyOn(itemsAdapterMock, 'get').and.callThrough();
@@ -36,7 +34,7 @@ describe('SearchComponent', () => {
 
   it('should create', () => {
     expect(subject).toBeTruthy();
-    expect(subject.form.controls.name.value).toEqual('')
+    expect(subject.form.controls.name.value).toEqual('');
   });
 
   it('#onSearch() triggers adapter method', () => {

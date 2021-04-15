@@ -1,6 +1,6 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {ItemsAdapter} from "./items.adapter";
+import {ItemsAdapter} from './items.adapter';
 
 @NgModule({
   imports: [
