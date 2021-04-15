@@ -1,0 +1,26 @@
+.search {
+  display: flex;
+  flex-direction: column;
+  margin-top: 2em;
+
+  &__head {
+    font-weight: bold;
+    font-size: 1.2em;
+  }
+
+  &__input {
+    display: flex;
+    flex-direction: row;
+    margin-top: 2em;
+  }
+
+  &__results {
+    margin-top: 2em;
+    display: flex;
+    flex-direction: column;
+
+    th, tr {
+      text-align: left;
+    }
+  }
+}
