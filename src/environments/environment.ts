@@ -2,9 +2,18 @@
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
+import {AppConfig, Endpoints} from "../app/core/model/app-config.model";
+
 export const environment = {
   production: false
 };
+
+(window as any).config = {
+  endpoints: {
+    items: 'http://localhost:8080/items'
+  } as Endpoints,
+} as AppConfig;
+
 
 /*
  * For easier debugging in development mode, you can import the following file
