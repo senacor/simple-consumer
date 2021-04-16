@@ -33,7 +33,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - run: npm ci --only=prod
+      - run: npm ci
 
       - name: Build dist
         run: npm run dist
