@@ -39,6 +39,19 @@ module.exports = function (config) {
     autoWatch: true,
     browsers: ['Chrome'],
     singleRun: false,
-    restartOnFileChange: true
+    restartOnFileChange: true,
+    customLaunchers: {
+      ChromeHeadless_no_sandbox: {
+        base: 'Chrome',
+        // https://peter.sh/experiments/chromium-command-line-switches/
+        flags: [
+          '--no-sandbox',
+          '--headless',
+          '--disable-gpu',
+          // Without a remote debugging port, Headless Chrome exits immediately.
+          '--remote-debugging-port=9222'
+        ]
+      }
+    }
   });
 };

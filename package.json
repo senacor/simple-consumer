@@ -6,8 +6,12 @@
     "start": "ng serve",
     "build": "ng build",
     "test": "ng test",
+    "test:headless": "ng test --browsers=ChromeHeadless_no_sandbox --watch=false",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "test:docker_build": "docker build -t simple-consumer -f test-support/Dockerfile .",
+    "test:docker_run": "docker run --rm -i -v $(PWD):/usr/src/app  simple-consumer /usr/local/bin/npm run test:headless",
+    "test:github": "npm run test:docker_build && npm run test:docker_run"
   },
   "private": true,
   "dependencies": {
