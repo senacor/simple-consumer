@@ -1,0 +1,63 @@
+name: ci
+
+on: push
+
+env:
+  GROUP: senacor
+  COMMIT_SHA: ${{ github.sha }}
+  REPO: simple-consumer
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: "12.x"
+
+      - run: npm install
+
+      - name: Unit tests
+        run: npm run test:github
+
+  docker:
+    needs:
+      - test
+    runs-on: ubuntu-latest
+    env:
+      PUSH_DOCKER_IMAGE: true
+      DOCKER_NAME: ghcr.io/${{ github.repository }}
+      DOCKER_REGISTRY: ghcr.io
+    steps:
+      - uses: actions/checkout@v2
+
+      - run: npm install
+
+      - name: Build dist
+        run: npm run dist
+
+      - run: ls -al && ls -al dist
+
+      - name: "Docker: Set up QEMU"
+        uses: docker/setup-qemu-action@v1
+
+      - name: "Docker: Set up Docker Buildx"
+        uses: docker/setup-buildx-action@v1
+
+      - name: "Docker: Login to Container Registry"
+        uses: docker/login-action@v1
+        if: env.PUSH_DOCKER_IMAGE == 'true'
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ${{ env.DOCKER_REGISTRY }}
+
+      - name: "Docker: Build and push to Container Registry"
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          tags: |
+            ${{ env.DOCKER_NAME }}:${{ env.COMMIT_SHA }}
+          push: ${{ env.PUSH_DOCKER_IMAGE }}
