@@ -80,8 +80,7 @@ jobs:
           chart: 'deployment/simple-consumer'
           version: '${{ github.sha }}'
           token: '${{ github.token }}'
-          values: |
-            image.repository: ${{ env.DOCKER_NAME }}
+          values:
             image.tag: ${{ env.COMMIT_SHA }}
           value-files: 'values.yml'
         env:
