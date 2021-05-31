@@ -13,7 +13,7 @@ jobs:
     services:
       provider:
         image: ghcr.io/senacor/simple-provider:5f4ada83f8cb7a60582f55fd90053774646a8ebe
-        options: "--entrypoint sh launch.sh"
+        options: "--entrypoint 'sh launch.sh'"
     steps:
       - uses: actions/checkout@v2
 
