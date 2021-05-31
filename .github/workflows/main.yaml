@@ -10,6 +10,9 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      provider:
+        image: ghcr.io/senacor/simple-provider:5f4ada83f8cb7a60582f55fd90053774646a8ebe
     steps:
       - uses: actions/checkout@v2
 
