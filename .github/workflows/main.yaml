@@ -84,3 +84,15 @@ jobs:
           tags: |
             ${{ env.DOCKER_NAME }}:${{ env.COMMIT_SHA }}
           push: ${{ env.PUSH_DOCKER_IMAGE }}
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: "12.x"
+
+      - name: Audit dependencies
+        run: npx audit-ci --moderate
