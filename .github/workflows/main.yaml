@@ -66,7 +66,8 @@ jobs:
     runs-on: 'ubuntu-latest'
     needs:
       - docker
-
+    env:
+      DOCKER_NAME: ghcr.io/${{ github.repository }}
     steps:
       - uses: actions/checkout@v1
 
@@ -80,8 +81,8 @@ jobs:
           version: '${{ github.sha }}'
           token: '${{ github.token }}'
           values: |
-            image.repository: '${{ env.DOCKER_NAME }}'
-            image.tag: '${{ env.COMMIT_SHA }}'
+            image.repository: ${{ env.DOCKER_NAME }}
+            image.tag: ${{ env.COMMIT_SHA }}
           value-files: 'values.yml'
         env:
           KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
