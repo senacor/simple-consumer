@@ -64,6 +64,9 @@ jobs:
 
   deployment:
     runs-on: 'ubuntu-latest'
+    needs:
+      - docker
+
     steps:
       - uses: actions/checkout@v1
 
