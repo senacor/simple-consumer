@@ -11,7 +11,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     services:
-      # Doof: Wird so nicht soped auf Integration Test step
+      # Contra: Container run this way not scoped to actual IT execution
       provider:
         image:  ghcr.io/senacor/simple-provider:8f414ad9db3eb54cda907efe522a52f7c6ba3782
         ports:
@@ -25,18 +25,21 @@ jobs:
 
       - run: npm install
 
-      # All tests actually
+      # Potential improv: Also run IT in UT containter to save time, since UT container is based on chrome
       - name: Unit tests
         run: npm run test:github
 
-      # - name: Integration tests
-        # Pro: Cypress action erlaubt simplen run in Chrome/etc Browser (statt Electon)
+      - name: Integration tests
+        # Pro:
+        # - Cypress action provides means to also run tests in chrome browser (statt Electon)
+        # - Lots of configuration items
         # Contra: 2 x npm install
-        # uses: cypress-io/github-action@v2
-        # with:
-        #   browser: chrome
-        #   start: npm start
-        #   wait-on: 'http://localhost:4200, http://localhost:8080/actuator/health'
+        # https://github.com/cypress-io/github-action
+        uses: cypress-io/github-action@v2
+        with:
+          browser: chrome
+          start: npm start
+          wait-on: 'http://localhost:4200, http://localhost:8080/actuator/health'
 
       # Pro: "Fast"
       # Contra: Elektron Browser
