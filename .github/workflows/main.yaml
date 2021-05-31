@@ -12,8 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       provider:
-        image: ghcr.io/senacor/simple-provider:5f4ada83f8cb7a60582f55fd90053774646a8ebe
-        options: '--entrypoint "sh launch.sh"'
+        image:  ghcr.io/senacor/simple-provider:8f414ad9db3eb54cda907efe522a52f7c6ba3782
     steps:
       - uses: actions/checkout@v2
 
