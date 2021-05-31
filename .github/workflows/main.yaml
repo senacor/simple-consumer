@@ -29,8 +29,7 @@ jobs:
         run: npm run test:github
 
       - name: Integration tests
-        run: npm run start-server-and-test start http://localhost:4200 cy:run
-
+        run: npm run e2e:ci
   docker:
     needs:
       - test
