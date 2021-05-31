@@ -8,7 +8,7 @@ image:
   repository: "ghcr.io/senacor/simple-consumer"
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "51dd86afbb663ed7b1de35631109e7acda342007"
+  tag: ""
 
 imagePullSecrets: []
 nameOverride: ""
