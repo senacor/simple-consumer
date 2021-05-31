@@ -79,9 +79,7 @@ jobs:
           values: |
             image.repository: '${{ env.DOCKER_NAME }}'
             image.tag: '${{ env.COMMIT_SHA }}'
-          value-files: >-
-          [
-            'values.yaml'
-          ]
+          value-files:
+            - 'values.yaml'
         env:
           KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
