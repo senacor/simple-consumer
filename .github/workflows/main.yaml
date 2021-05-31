@@ -70,7 +70,6 @@ jobs:
       DOCKER_NAME: ghcr.io/${{ github.repository }}
     steps:
       - uses: actions/checkout@v1
-
       - name: 'Deploy'
         uses: 'deliverybot/helm@v1'
         with:
@@ -81,7 +80,7 @@ jobs:
           version: '${{ github.sha }}'
           token: '${{ github.token }}'
           values: |
-            image.tag: ${{ env.COMMIT_SHA }}
+            image.tag: '${{ env.COMMIT_SHA }}'
           value-files: 'values.yml'
         env:
           KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
