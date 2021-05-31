@@ -85,4 +85,4 @@ jobs:
             --name ${{ secrets.KUBERNETES_CLUSTER_NAME }} \
             --role-arn ${{ secrets.KUBERNETES_CLUSTER_DEPLOY_ROLE }}
 
-          helm upgrade --install --set image.tag=${{ env.COMMIT_SHA }} --namespace ${{ github.repository }} -f values.yaml ${{ github.repository }} deployment/${{ github.repository }}
+          helm upgrade --install --set image.tag=${{ env.COMMIT_SHA }} --namespace ${{ env.REPO }} -f values.yaml ${{ env.REPO }} deployment/${{ env.REPO }}
