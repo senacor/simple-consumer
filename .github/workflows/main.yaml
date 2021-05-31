@@ -97,7 +97,7 @@ jobs:
           node-version: "12.x"
 
       - name: Audit dependencies
-        run: npx audit-ci --critical
+        run: npx audit-ci --high
      
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
