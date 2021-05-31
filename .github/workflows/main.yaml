@@ -24,6 +24,9 @@ jobs:
 
       - name: Unit tests
         run: npm run test:github
+        
+      - name: Integration tests
+        run: curl -v http://provider:8080
 
   docker:
     needs:
