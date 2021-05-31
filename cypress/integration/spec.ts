@@ -14,7 +14,7 @@ it('finds 3 results for a "empty" search', () => {
   cy.contains('.search__head', 'Search Items');
   cy.get('button').click();
 
-  cy.contains('.search__results', 'Number of items retrieved: 3');
-  cy.get('.search__results').find('tr').should('have.length', 3);
+  cy.contains('.search__results', 'Number of items retrieved: 4');
+  cy.get('.search__results').find('tr').should('have.length', 4);
 });
 

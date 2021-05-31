@@ -11,7 +11,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     services:
-      # Contra: Container run this way not scoped to actual IT execution
+      # Contra: Container runs this way not scoped to actual IT execution
       provider:
         image:  ghcr.io/senacor/simple-provider:8f414ad9db3eb54cda907efe522a52f7c6ba3782
         ports:
