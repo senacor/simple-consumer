@@ -61,3 +61,27 @@ jobs:
           tags: |
             ${{ env.DOCKER_NAME }}:${{ env.COMMIT_SHA }}
           push: ${{ env.PUSH_DOCKER_IMAGE }}
+
+  deployment:
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: 'Deploy'
+        uses: 'deliverybot/helm@v1'
+        with:
+          helm: helm3
+          release: 'simple-consumer'
+          namespace: 'simple-consumer'
+          chart: 'deployment/simple-consumer'
+          version: '${{ github.sha }}'
+          token: '${{ github.token }}'
+          values: |
+            image.repository: '${{ env.DOCKER_NAME }}'
+            image.tag: '${{ env.COMMIT_SHA }}'
+          value-files: >-
+          [
+            "values.yaml"
+          ]
+        env:
+          KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
