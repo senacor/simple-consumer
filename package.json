@@ -6,7 +6,7 @@
     "start": "ng serve",
     "build": "ng build",
     "test": "ng test",
-    "test:headless": "ng test --browsers=ChromeHeadless_no_sandbox --watch=false",
+    "test:headless": "ng test --browsers=ChromeHeadless_no_sandbox --watch=false && npm run e2e:ci",
     "dist": "ng build --prod",
     "lint": "ng lint",
     "e2e": "ng e2e",
@@ -15,7 +15,8 @@
     "test:github": "npm run test:docker_build && npm run test:docker_run",
     "cy:open": "cypress open",
     "cy:run": "cypress run",
-    "e2e:ci": "start-server-and-test start http://localhost:4200 cy:run"
+    "cy:run:chrome": "cypress run --browser chrome --headless",
+    "e2e:ci": "start-server-and-test start http://localhost:4200 cy:run:chrome"
   },
   "private": true,
   "dependencies": {
