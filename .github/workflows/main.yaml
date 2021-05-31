@@ -33,6 +33,7 @@ jobs:
         with:
           browser: chrome
           start: npm start
+          wait-on: 'http://localhost:4200, http://localhost:8080/actuator/health'
       #   run: npm run e2e:ci
 
   docker:
