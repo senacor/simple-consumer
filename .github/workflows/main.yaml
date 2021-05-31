@@ -11,6 +11,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     services:
+      # Doof: Wird so nicht soped auf Integration Test step
       provider:
         image:  ghcr.io/senacor/simple-provider:8f414ad9db3eb54cda907efe522a52f7c6ba3782
         ports:
@@ -26,9 +27,9 @@ jobs:
 
       - name: Unit tests
         run: npm run test:github
-        
+
       - name: Integration tests
-        run: curl -v http://localhost:8080
+        run: npm run start-server-and-test start http://localhost:4200 cy:run
 
   docker:
     needs:
