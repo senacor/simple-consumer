@@ -87,4 +87,4 @@ jobs:
 
           chmod +x runtime/launch.sh
 
-          helm upgrade --install --set image.tag=${{ env.COMMIT_SHA }} --set backend.url='http://a4e9b1026a3754124baf6b0f6b2c73cb-352962896.eu-west-2.elb.amazonaws.com' --namespace ${{ env.REPO }} -f deployment/${{ env.REPO }}/values.yaml ${{ env.REPO }} deployment/${{ env.REPO }}
+          helm upgrade --install --set image.tag=${{ env.COMMIT_SHA }} --set backend.url='https://cicd.cloudnative.senacor.com/backend' --namespace ${{ env.REPO }} -f deployment/${{ env.REPO }}/values.yaml ${{ env.REPO }} deployment/${{ env.REPO }}
