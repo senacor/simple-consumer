@@ -13,6 +13,8 @@ jobs:
     services:
       provider:
         image:  ghcr.io/senacor/simple-provider:8f414ad9db3eb54cda907efe522a52f7c6ba3782
+        ports:
+          - 8080:8080
     steps:
       - uses: actions/checkout@v2
 
@@ -26,7 +28,7 @@ jobs:
         run: npm run test:github
         
       - name: Integration tests
-        run: curl -v http://provider:8080
+        run: curl -v http://localhost:8080
 
   docker:
     needs:
