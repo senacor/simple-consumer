@@ -29,7 +29,11 @@ jobs:
         run: npm run test:github
 
       - name: Integration tests
-        run: npm run e2e:ci
+      - uses: cypress-io/github-action@v2
+        with:
+          browser: chrome
+      #   run: npm run e2e:ci
+
   docker:
     needs:
       - test
