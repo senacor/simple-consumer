@@ -6,6 +6,7 @@ env:
   GROUP: senacor
   COMMIT_SHA: ${{ github.sha }}
   REPO: simple-consumer
+  DOCKER_NAME: ghcr.io/${{ github.repository }}
 
 jobs:
   test:
@@ -51,7 +52,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PUSH_DOCKER_IMAGE: true
-      DOCKER_NAME: ghcr.io/${{ github.repository }}
       DOCKER_REGISTRY: ghcr.io
     steps:
       - uses: actions/checkout@v2
@@ -84,3 +84,27 @@ jobs:
           tags: |
             ${{ env.DOCKER_NAME }}:${{ env.COMMIT_SHA }}
           push: ${{ env.PUSH_DOCKER_IMAGE }}
+
+  security:
+    needs:
+      - docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: "12.x"
+
+      - name: Audit dependencies
+        run: npx audit-ci --high
+     
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: "${{ env.DOCKER_NAME }}:${{ env.COMMIT_SHA }}"
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
