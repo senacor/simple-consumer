@@ -120,7 +120,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - run: echo "$DECRYPT_KEY" > deplyoment/secrets/ansible-decrypt-pass
+      - run: echo "$DECRYPT_KEY" > deployment/secrets/ansible-decrypt-pass
         shell: bash
         env:
           DECRYPT_KEY: ${{ secrets.ANSIBLE_DECRYPT_PASS }}
@@ -131,6 +131,6 @@ jobs:
             --name ${{ secrets.KUBERNETES_CLUSTER_NAME }} \
             --role-arn ${{ secrets.KUBERNETES_CLUSTER_DEPLOY_ROLE }}
 
-          ansible-vault decrypt secrets/vault --vault-password-file deplyoment/secrets/ansible-decrypt-pass --output deplyoment/secrets/secrets-decrypted.yaml
+          ansible-vault decrypt secrets/vault --vault-password-file deployment/secrets/ansible-decrypt-pass --output deployment/secrets/secrets-decrypted.yaml
 
-          helm upgrade --install --set image.tag=${{ env.COMMIT_SHA }} --set backend.url=${{ secrets.BACKEND_SERVICE_URL }}  --namespace ${{ env.REPO }} -f deployment/${{ env.REPO }}/values.yaml -f deplyoment/secrets/secrets-decrypted.yaml ${{ env.REPO }} deployment/${{ env.REPO }}
+          helm upgrade --install --set image.tag=${{ env.COMMIT_SHA }} --set backend.url=${{ secrets.BACKEND_SERVICE_URL }}  --namespace ${{ env.REPO }} -f deployment/${{ env.REPO }}/values.yaml -f deployment/secrets/secrets-decrypted.yaml ${{ env.REPO }} deployment/${{ env.REPO }}
