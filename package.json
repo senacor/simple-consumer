@@ -10,6 +10,7 @@
     "dist": "ng build --prod",
     "lint": "ng lint",
     "e2e": "ng e2e",
+    "test commit": "ng e2e",
     "test:docker_build": "docker build -t simple-consumer -f test-support/Dockerfile .",
     "test:docker_run": "docker run --rm -i -v $(pwd):/usr/src/app simple-consumer npm run test:headless",
     "test:github": "npm run test:docker_build && npm run test:docker_run",
