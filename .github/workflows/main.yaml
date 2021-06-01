@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       # Contra: Container runs this way not scoped to actual IT execution
+      # TODO PSI: After versioning branch in provider use correct version here:
       provider:
         image:  ghcr.io/senacor/simple-provider:8f414ad9db3eb54cda907efe522a52f7c6ba3782
         ports:
