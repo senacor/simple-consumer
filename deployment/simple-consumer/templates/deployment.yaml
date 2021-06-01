@@ -36,6 +36,11 @@ spec:
           env:
             - name: BACKEND_URL
               value: {{ .Values.backend.url }}
+            - name: API_KEY_PRODUCER
+              valueFrom:
+                secretKeyRef:
+                  name: apikey-producer
+                  key: apikey
           ports:
             - name: http
               containerPort: 80
