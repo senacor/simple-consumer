@@ -24,7 +24,7 @@ jobs:
         with:
           node-version: "12.x"
 
-      - run: npm install
+      - run: npm ci
 
       # Potential improv: Also run IT in UT containter to save time, since UT container is based on chrome
       - name: Unit tests
@@ -56,12 +56,28 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - run: npm install
+      - uses: actions/setup-node@v1
+        with:
+          node-version: "12.x"
+
+      - run: npm ci
 
       - name: Build dist
         run: npm run dist
 
-      - run: ls -al && ls -al dist
+      - name: Extract branch name
+        # if: env.GITHUB_HEAD_REF != 'master'
+        # git ls-remote --heads -q | grep $(git rev-parse HEAD) | awk '{print $2}' | sed -e 's|refs/heads/||g' | sed -e 's|/|_|g'
+        # https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions
+        run: |
+          echo "BRANCH_TAG=$(echo $GITHUB_HEAD_REF | sed -e 's|refs/heads/||g' | sed -e 's|/|_|g')" >> $GITHUB_ENV
+
+      - name: Extract artifact version
+        # git ls-remote --heads -q | grep $(git rev-parse HEAD) | awk '{print $2}' | sed -e 's|refs/heads/||g' | sed -e 's|/|_|g'
+        # https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions
+        run: |
+          echo "VERSION_TAG=$(jq -r ''.version' package.json)" >> $GITHUB_ENV
+
 
       - name: "Docker: Set up QEMU"
         uses: docker/setup-qemu-action@v1
@@ -83,6 +99,9 @@ jobs:
           context: .
           tags: |
             ${{ env.DOCKER_NAME }}:${{ env.COMMIT_SHA }}
+            ${{ env.DOCKER_NAME }}:${{ env.BRANCH_TAG }}
+            ${{ env.DOCKER_NAME }}:${{ env.VERSION_TAG }}
+            ${{ env.DOCKER_NAME }}:${{ env.VERSION_TAG }}-${{ env.BRANCH_TAG }}
           push: ${{ env.PUSH_DOCKER_IMAGE }}
 
   security:
