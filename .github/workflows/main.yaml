@@ -7,12 +7,14 @@ env:
   COMMIT_SHA: ${{ github.sha }}
   REPO: simple-consumer
   DOCKER_NAME: ghcr.io/${{ github.repository }}
+  CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
 
 jobs:
   test:
     runs-on: ubuntu-latest
     services:
       # Contra: Container runs this way not scoped to actual IT execution
+      # TODO PSI: After versioning branch in provider use correct version here:
       provider:
         image:  ghcr.io/senacor/simple-provider:8f414ad9db3eb54cda907efe522a52f7c6ba3782
         ports:
@@ -24,11 +26,20 @@ jobs:
         with:
           node-version: "12.x"
 
-      - run: npm install
+      - run: npm ci
+
+      - run: mkdir coverage
+      - run: chmod -R 777 coverage
 
       # Potential improv: Also run IT in UT containter to save time, since UT container is based on chrome
       - name: Unit tests
         run: npm run test:github
+
+      - name: lits report
+        run: ls
+
+      - name: Update code coverage
+        run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r coverage/lcov.info
 
       - name: Integration tests
         # Pro:
@@ -56,12 +67,30 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - run: npm install
+      - uses: actions/setup-node@v1
+        with:
+          node-version: "12.x"
+
+      - run: npm ci
 
       - name: Build dist
         run: npm run dist
 
-      - run: ls -al && ls -al dist
+      - name: Extract branch name
+        # if: env.GITHUB_HEAD_REF != 'master'
+        # git ls-remote --heads -q | grep $(git rev-parse HEAD) | awk '{print $2}' | sed -e 's|refs/heads/||g' | sed -e 's|/|_|g'
+        # https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions
+        run: |
+          REF=$GITHUB_HEAD_REF
+          [[ -z $REF ]] && REF=$GITHUB_REF
+          echo "BRANCH_TAG=$(echo $REF | sed -e 's|refs/heads/||g' | sed -e 's|/|_|g')" >> $GITHUB_ENV
+
+      - name: Extract artifact version
+        # git ls-remote --heads -q | grep $(git rev-parse HEAD) | awk '{print $2}' | sed -e 's|refs/heads/||g' | sed -e 's|/|_|g'
+        # https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions
+        run: |
+          echo "VERSION_TAG=$(jq -r '.version' package.json)" >> $GITHUB_ENV
+
 
       - name: "Docker: Set up QEMU"
         uses: docker/setup-qemu-action@v1
@@ -83,7 +112,37 @@ jobs:
           context: .
           tags: |
             ${{ env.DOCKER_NAME }}:${{ env.COMMIT_SHA }}
+            ${{ env.DOCKER_NAME }}:${{ env.BRANCH_TAG }}
+            ${{ env.DOCKER_NAME }}:${{ env.VERSION_TAG }}
+            ${{ env.DOCKER_NAME }}:${{ env.VERSION_TAG }}-${{ env.BRANCH_TAG }}
           push: ${{ env.PUSH_DOCKER_IMAGE }}
+
+
+  deployment:
+    runs-on: 'ubuntu-latest'
+    needs:
+      - docker
+    env:
+      AWS_DEFAULT_REGION: eu-west-2
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - run: echo "$DECRYPT_KEY" > deployment/secrets/ansible-decrypt-pass
+        shell: bash
+        env:
+          DECRYPT_KEY: ${{ secrets.ANSIBLE_DECRYPT_PASS }}
+
+      - name: deploy
+        run: |
+          aws eks update-kubeconfig \
+            --name ${{ secrets.KUBERNETES_CLUSTER_NAME }} \
+            --role-arn ${{ secrets.KUBERNETES_CLUSTER_DEPLOY_ROLE }}
+
+          ansible-vault decrypt deployment/secrets/vault --vault-password-file deployment/secrets/ansible-decrypt-pass --output deployment/secrets/secrets-decrypted.yaml
+
+          helm upgrade --install --set image.tag=${{ env.COMMIT_SHA }} --set backend.url=${{ secrets.BACKEND_SERVICE_URL }}  --namespace ${{ env.REPO }} -f deployment/${{ env.REPO }}/values.yaml -f deployment/secrets/secrets-decrypted.yaml ${{ env.REPO }} deployment/${{ env.REPO }}
 
   security:
     needs:
@@ -108,29 +167,3 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
-
-  deployment:
-    runs-on: 'ubuntu-latest'
-    needs:
-      - security
-    env:
-      AWS_DEFAULT_REGION: eu-west-2
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    steps:
-      - uses: actions/checkout@v2
-
-      - run: echo "$DECRYPT_KEY" > deployment/secrets/ansible-decrypt-pass
-        shell: bash
-        env:
-          DECRYPT_KEY: ${{ secrets.ANSIBLE_DECRYPT_PASS }}
-
-      - name: deploy
-        run: |
-          aws eks update-kubeconfig \
-            --name ${{ secrets.KUBERNETES_CLUSTER_NAME }} \
-            --role-arn ${{ secrets.KUBERNETES_CLUSTER_DEPLOY_ROLE }}
-
-          ansible-vault decrypt deployment/secrets/vault --vault-password-file deployment/secrets/ansible-decrypt-pass --output deployment/secrets/secrets-decrypted.yaml
-
-          helm upgrade --install --set image.tag=${{ env.COMMIT_SHA }} --set backend.url=${{ secrets.BACKEND_SERVICE_URL }}  --namespace ${{ env.REPO }} -f deployment/${{ env.REPO }}/values.yaml -f deployment/secrets/secrets-decrypted.yaml ${{ env.REPO }} deployment/${{ env.REPO }}
