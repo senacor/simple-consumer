@@ -70,7 +70,7 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: "12.x"
-          
+
       - run: npm ci
 
       - name: Build dist
@@ -149,6 +149,8 @@ jobs:
           node-version: "12.x"
 
       - name: Audit dependencies
+        uses: tj-actions/changed-files@v6.3
+        if: contains(steps.changed-files.outputs.modified_files, 'package.json')
         run: npx audit-ci --high
 
       - name: Run Trivy vulnerability scanner
