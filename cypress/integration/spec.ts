@@ -1,5 +1,5 @@
 
-it('finds 1 result when auto-searching for "screwdriver"', () => {
+it('finds 1 result if auto-searching for "screwdriver"', () => {
   cy.visit('/');
   cy.contains('.search__head', 'Search Items');
   cy.get('.search__input').find('input').type('screw');
@@ -9,7 +9,7 @@ it('finds 1 result when auto-searching for "screwdriver"', () => {
   cy.get('.search__results tr td').first().contains('Screwdriver');
 });
 
-it('finds 3 results for a "empty" search', () => {
+it('finds 3 results for an "empty" search', () => {
   cy.visit('/');
   cy.contains('.search__head', 'Search Items');
   cy.get('button').click();

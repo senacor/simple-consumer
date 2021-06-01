@@ -98,7 +98,7 @@ jobs:
 
       - name: Audit dependencies
         run: npx audit-ci --high
-     
+
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
@@ -108,3 +108,30 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
+
+  deployment:
+    runs-on: 'ubuntu-latest'
+    needs:
+      - security
+    env:
+      AWS_DEFAULT_REGION: eu-west-2
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: deploy
+        run: |
+          curl https://baltocdn.com/helm/signing.asc | sudo apt-key add -
+          sudo apt-get install apt-transport-https --yes
+          echo "deb https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+          sudo apt-get update
+          sudo apt-get install -y helm
+
+          aws eks update-kubeconfig \
+            --name ${{ secrets.KUBERNETES_CLUSTER_NAME }} \
+            --role-arn ${{ secrets.KUBERNETES_CLUSTER_DEPLOY_ROLE }}
+
+          chmod +x runtime/launch.sh
+
+          helm upgrade --install --set image.tag=${{ env.COMMIT_SHA }} --set backend.url=${{ secrets.BACKEND_SERVICE_URL }} --namespace ${{ env.REPO }} -f deployment/${{ env.REPO }}/values.yaml ${{ env.REPO }} deployment/${{ env.REPO }}
