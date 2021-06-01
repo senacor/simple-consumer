@@ -32,7 +32,7 @@ jobs:
 
       - name: Integration tests
         # Pro:
-        # - Cypress action provides means to also run tests in chrome browser (statt Electon)
+        # - Cypress action provides means to also run tests in chrome browser (instead of Electon)
         # - Lots of configuration items
         # Contra: 2 x npm install
         # https://github.com/cypress-io/github-action
