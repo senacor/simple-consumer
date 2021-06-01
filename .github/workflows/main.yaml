@@ -24,7 +24,7 @@ jobs:
         with:
           node-version: "12.x"
 
-      - run: npm ci
+      - run: npm install
 
       # Potential improv: Also run IT in UT containter to save time, since UT container is based on chrome
       - name: Unit tests
@@ -56,7 +56,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - run: npm ci
+      - run: npm install
 
       - name: Build dist
         run: npm run dist
