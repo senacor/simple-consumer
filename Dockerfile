@@ -6,7 +6,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get upgrade -y \
 COPY dist/simple-consumer /usr/share/nginx/html/
 
 RUN mkdir /app
-COPY runtime/launch.sh /app
+COPY runtime/ /app
 
 ENTRYPOINT ["/bin/bash"]
 CMD ["/app/launch.sh"]

@@ -61,8 +61,6 @@ jobs:
       - name: Build dist
         run: npm run dist
 
-      - run: ls -al && ls -al dist
-
       - name: "Docker: Set up QEMU"
         uses: docker/setup-qemu-action@v1
 
