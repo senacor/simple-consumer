@@ -70,7 +70,9 @@ jobs:
         # git ls-remote --heads -q | grep $(git rev-parse HEAD) | awk '{print $2}' | sed -e 's|refs/heads/||g' | sed -e 's|/|_|g'
         # https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions
         run: |
-          echo "BRANCH_TAG=$(echo $GITHUB_HEAD_REF | sed -e 's|refs/heads/||g' | sed -e 's|/|_|g')" >> $GITHUB_ENV
+          REF=$GITHUB_HEAD_REF
+          [[ -z $REF ]] && REF=$GITHUB_REF
+          echo "BRANCH_TAG=$(echo $REF | sed -e 's|refs/heads/||g' | sed -e 's|/|_|g')" >> $GITHUB_ENV
 
       - name: Extract artifact version
         # git ls-remote --heads -q | grep $(git rev-parse HEAD) | awk '{print $2}' | sed -e 's|refs/heads/||g' | sed -e 's|/|_|g'
