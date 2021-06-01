@@ -58,9 +58,9 @@ jobs:
       #   run: npm run e2e:ci
 
   docker:
-    runs-on: ubuntu-latest
     needs:
-      - status
+      - test
+    runs-on: ubuntu-latest
     env:
       PUSH_DOCKER_IMAGE: true
       DOCKER_REGISTRY: ghcr.io
@@ -142,8 +142,6 @@ jobs:
 
       - name: deploy
         run: |
-          echo ${{ steps.deployment-name.outputs.name }}
-
           aws eks update-kubeconfig \
             --name ${{ secrets.KUBERNETES_CLUSTER_NAME }} \
             --role-arn ${{ secrets.KUBERNETES_CLUSTER_DEPLOY_ROLE }}

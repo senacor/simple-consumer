@@ -1,0 +1,26 @@
+name: Clean up temporary environment
+
+on: delete
+
+env:
+  REPO: simple-consumer
+
+jobs:
+  cleanup:
+    if: github.event.ref_type == 'branch' && github.event.ref != 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate deployment name
+        id: deployment-name
+        run: |
+          REF=${{ github.event.head_ref }}
+          echo "::set-output name=name::$REPO-$(echo -n \"$REF\" | sha1sum | head -c 10)"
+
+
+      - name: Uninstall Helm release
+        run: |
+          aws eks update-kubeconfig \
+            --name ${{ secrets.KUBERNETES_CLUSTER_NAME }} \
+            --role-arn ${{ secrets.KUBERNETES_CLUSTER_DEPLOY_ROLE }}
+
+          helm uninstall --namespace ${{ env.REPO }} ${{ steps.deployment-name.outputs.name }}
