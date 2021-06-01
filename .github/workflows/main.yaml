@@ -126,7 +126,7 @@ jobs:
             --name ${{ secrets.KUBERNETES_CLUSTER_NAME }} \
             --role-arn ${{ secrets.KUBERNETES_CLUSTER_DEPLOY_ROLE }}
 
-          echo "${{ secrets.ANSIBLE_DECRYPT_PASS }}" > deplyoment/secrets/ansible-decrypt-pass
+          echo ${{ secrets.ANSIBLE_DECRYPT_PASS }} > deplyoment/secrets/ansible-decrypt-pass
           ansible-vault decrypt secrets/vault --vault-password-file deplyoment/secrets/ansible-decrypt-pass --output deplyoment/secrets/secrets-decrypted.yaml
 
           helm upgrade --install --set image.tag=${{ env.COMMIT_SHA }} --set backend.url=${{ secrets.BACKEND_SERVICE_URL }}  --namespace ${{ env.REPO }} -f deployment/${{ env.REPO }}/values.yaml -f deplyoment/secrets/secrets-decrypted.yaml ${{ env.REPO }} deployment/${{ env.REPO }}
