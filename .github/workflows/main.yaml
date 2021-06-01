@@ -7,6 +7,7 @@ env:
   COMMIT_SHA: ${{ github.sha }}
   REPO: simple-consumer
   DOCKER_NAME: ghcr.io/${{ github.repository }}
+  CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
 
 jobs:
   test:
@@ -27,9 +28,18 @@ jobs:
 
       - run: npm ci
 
+      - run: mkdir coverage
+      - run: chmod -R 777 coverage
+
       # Potential improv: Also run IT in UT containter to save time, since UT container is based on chrome
       - name: Unit tests
         run: npm run test:github
+
+      - name: lits report
+        run: ls
+
+      - name: Update code coverage
+        run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r coverage/lcov.info
 
       - name: Integration tests
         # Pro:
