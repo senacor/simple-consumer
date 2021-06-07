@@ -78,7 +78,7 @@ jobs:
           REF=${{ github.head_ref || github.ref }}
           SUFFIX="main"
           if [ "$REF" != "refs/heads/main" ]; then
-            SUFFIX=$(echo $REF | sed -e 's|refs/heads/||g' | sed -e 's|/|_|g | head -c 20')
+            SUFFIX=$(echo $REF | sed -e 's|refs/heads/||g' | sed -e 's|/|_|g' | head -c 20')
           fi
           echo "BASE_HREF=$SUFFIX" >> $GITHUB_ENV
           echo "::set-output name=branch_suffix::$SUFFIX"
