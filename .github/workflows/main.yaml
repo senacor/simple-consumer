@@ -28,8 +28,7 @@ jobs:
 
       - run: npm ci
 
-      - run: mkdir coverage
-      - run: chmod -R 777 coverage
+      - run: mkdir coverage && chmod -R 777 coverage
 
       # Potential improv: Also run IT in UT containter to save time, since UT container is based on chrome
       - name: Unit tests
@@ -43,7 +42,7 @@ jobs:
 
       - name: Integration tests
         # Pro:
-        # - Cypress action provides means to also run tests in chrome browser (statt Electon)
+        # - Cypress action provides means to also run tests in chrome browser (instead of Electron)
         # - Lots of configuration items
         # Contra: 2 x npm install
         # https://github.com/cypress-io/github-action
@@ -116,7 +115,6 @@ jobs:
             ${{ env.DOCKER_NAME }}:${{ env.VERSION_TAG }}
             ${{ env.DOCKER_NAME }}:${{ env.VERSION_TAG }}-${{ env.BRANCH_TAG }}
           push: ${{ env.PUSH_DOCKER_IMAGE }}
-
 
   deployment:
     runs-on: 'ubuntu-latest'
