@@ -8,7 +8,6 @@ env:
   REPO: simple-consumer
   DOCKER_NAME: ghcr.io/${{ github.repository }}
   CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
-  # BRANCH_DEPLOYMENT_SUFFIX: Calculated
 
 jobs:
   test:
@@ -61,6 +60,8 @@ jobs:
     needs:
       - test
     runs-on: ubuntu-latest
+    outputs:
+      branch_suffix: ${{ steps.calculate_branch_suffix.outputs.branch_suffix }}
     env:
       PUSH_DOCKER_IMAGE: true
       DOCKER_REGISTRY: ghcr.io
@@ -71,19 +72,21 @@ jobs:
         with:
           node-version: "12.x"
 
-      - name: Generate branch suffix
+      - name: Calculate branch suffix
+        id: calculate_branch_suffix
         run: |
           REF=${{ github.head_ref || github.ref }}
+          SUFFIX="main"
           if [ "$REF" != "refs/heads/main" ]; then
-            echo "BRANCH_DEPLOYMENT_SUFFIX=$(echo $REF | sed -e 's|refs/heads/||g' | sed -e 's|/|_|g | head -c 20')" >> $GITHUB_ENV
-          else
-            echo "BRANCH_DEPLOYMENT_SUFFIX=main" >> $GITHUB_ENV
+            SUFFIX=$(echo $REF | sed -e 's|refs/heads/||g' | sed -e 's|/|_|g | head -c 20')"
           fi
+          echo "BASE_HREF=$SUFFIX" >> $GITHUB_ENV
+          echo "::set-output name=branch_suffix::$SUFFIX"
 
       - run: npm ci
 
       - name: Build dist
-        run: npm run dist -- --base-href="${{ env.BRANCH_DEPLOYMENT_SUFFIX }}/"
+        run: npm run dist -- --base-href="${{ env.BASE_HREF }}/"
 
       - name: Extract branch name
         # if: env.GITHUB_HEAD_REF != 'master'
@@ -151,9 +154,9 @@ jobs:
           helm upgrade --install \
             --set image.tag=${{ env.COMMIT_SHA }} \
             --set backend.url=${{ secrets.BACKEND_SERVICE_URL }} \
-            --set ambassador.branchBase=${{ env.BRANCH_DEPLOYMENT_SUFFIX }} \
+            --set ambassador.branchBase=${{ needs.docker.outputs.branch_suffix }} \
             --namespace ${{ env.REPO }} \
-            -f deployment/${{ env.REPO }}/values.yaml ${{env.REPO}}-${{ env.BRANCH_DEPLOYMENT_SUFFIX}} deployment/${{ env.REPO }}
+            -f deployment/${{ env.REPO }}/values.yaml ${{env.REPO}}-${{ needs.docker.outputs.branch_suffix}} deployment/${{ env.REPO }}
 
   security:
     needs:
