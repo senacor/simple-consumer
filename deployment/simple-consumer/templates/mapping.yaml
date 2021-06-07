@@ -5,4 +5,4 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   prefix: /
-  service: {{ include "simple-consumer.fullname" . }}:80
+  service: {{ include "simple-consumer.fullname" . }}:8080
