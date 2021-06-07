@@ -7,7 +7,8 @@ COPY dist/simple-consumer /usr/share/nginx/html/
 
 RUN mkdir /app
 COPY runtime/ /app
-RUN chown nginx: /app/nginx.conf
+RUN chown -R nginx: /app
+
 
 ENTRYPOINT ["/bin/bash"]
 CMD ["/app/launch.sh"]
