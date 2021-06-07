@@ -28,8 +28,7 @@ jobs:
 
       - run: npm ci
 
-      - run: mkdir coverage
-      - run: chmod -R 777 coverage
+      - run: mkdir coverage && chmod -R 777 coverage
 
       # Potential improv: Also run IT in UT containter to save time, since UT container is based on chrome
       - name: Unit tests
@@ -43,7 +42,7 @@ jobs:
 
       - name: Integration tests
         # Pro:
-        # - Cypress action provides means to also run tests in chrome browser (statt Electon)
+        # - Cypress action provides means to also run tests in chrome browser (instead of Electron)
         # - Lots of configuration items
         # Contra: 2 x npm install
         # https://github.com/cypress-io/github-action
@@ -70,7 +69,7 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: "12.x"
-          
+
       - run: npm ci
 
       - name: Build dist
@@ -139,6 +138,10 @@ jobs:
             echo "::set-output name=name::$REPO"
           fi
 
+      - run: echo "$DECRYPT_KEY" > deployment/secrets/ansible-decrypt-pass
+        shell: bash
+        env:
+          DECRYPT_KEY: ${{ secrets.ANSIBLE_DECRYPT_PASS }}
 
       - name: deploy
         run: |
@@ -146,7 +149,9 @@ jobs:
             --name ${{ secrets.KUBERNETES_CLUSTER_NAME }} \
             --role-arn ${{ secrets.KUBERNETES_CLUSTER_DEPLOY_ROLE }}
 
-          helm upgrade --install --set image.tag=${{ env.COMMIT_SHA }} --set backend.url=${{ secrets.BACKEND_SERVICE_URL }} --namespace ${{ env.REPO }} -f deployment/${{ env.REPO }}/values.yaml ${{ steps.deployment-name.outputs.name }} deployment/${{ env.REPO }}
+          ansible-vault decrypt deployment/secrets/vault --vault-password-file deployment/secrets/ansible-decrypt-pass --output deployment/secrets/secrets-decrypted.yaml
+
+          helm upgrade --install --set image.tag=${{ env.COMMIT_SHA }} --set backend.url=${{ secrets.BACKEND_SERVICE_URL }}  --namespace ${{ env.REPO }} -f deployment/${{ env.REPO }}/values.yaml -f deployment/secrets/secrets-decrypted.yaml ${{ env.REPO }} deployment/${{ env.REPO }}
 
   security:
     needs:
