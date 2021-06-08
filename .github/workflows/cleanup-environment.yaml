@@ -10,11 +10,14 @@ jobs:
     if: github.event.ref_type == 'branch' && github.event.ref != 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - name: Generate deployment name
-        id: deployment-name
+      - name: Extract deployment name
         run: |
-          REF=${{ github.event.head_ref }}
-          echo "::set-output name=name::$REPO-$(echo -n \"$REF\" | sha1sum | head -c 10)"
+          REF=${{ github.head_ref || github.ref }}
+          SUFFIX="main"
+          if [ "$REF" != "refs/heads/main" ]; then
+            SUFFIX=$(echo $REF | sed -e 's|refs/heads/||g' | sed -e 's|[^[:alnum:]]||g' | head -c 20)
+          fi
+          echo "DEPLOYMENT_NAME=$REPO-$SUFFIX" >> $GITHUB_ENV
 
 
       - name: Uninstall Helm release
@@ -23,4 +26,4 @@ jobs:
             --name ${{ secrets.KUBERNETES_CLUSTER_NAME }} \
             --role-arn ${{ secrets.KUBERNETES_CLUSTER_DEPLOY_ROLE }}
 
-          helm uninstall --namespace ${{ env.REPO }} ${{ steps.deployment-name.outputs.name }}
+          helm uninstall --namespace ${{ env.DEPLOYMENT_NAME }} ${{ env.DEPLOYMENT_NAME }}
