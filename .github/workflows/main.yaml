@@ -87,7 +87,7 @@ jobs:
 
       - name: Build dist
         # Trailing base href slash est importante
-        run: npm run dist -- --base-href="${{ env.BASE_HREF }}/"
+        run: npm run dist -- --base-href="/${{ env.BASE_HREF }}/"
 
       - name: Extract branch name
         # if: env.GITHUB_HEAD_REF != 'master'
