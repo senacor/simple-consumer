@@ -163,6 +163,7 @@ jobs:
             -f deployment/secrets/secrets-decrypted.yaml \
             ${{env.REPO}}-${{ needs.docker.outputs.branch_ctx}} deployment/${{ env.REPO }}
 
+          helm get manifest ${{env.REPO}}-${{ needs.docker.outputs.branch_ctx}}
   security:
     needs:
       - docker
