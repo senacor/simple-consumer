@@ -61,7 +61,7 @@ jobs:
       - test
     runs-on: ubuntu-latest
     outputs:
-      branch_suffix: ${{ steps.calculate_branch_suffix.outputs.branch_suffix }}
+      branch_ctx: ${{ steps.extract_branch_ctx.outputs.branch_ctx }}
     env:
       PUSH_DOCKER_IMAGE: true
       DOCKER_REGISTRY: ghcr.io
@@ -72,8 +72,8 @@ jobs:
         with:
           node-version: "12.x"
 
-      - name: Calculate branch suffix
-        id: calculate_branch_suffix
+      - name: Extract branch context
+        id: extract_branch_ctx
         run: |
           REF=${{ github.head_ref || github.ref }}
           SUFFIX="main"
@@ -81,11 +81,12 @@ jobs:
             SUFFIX=$(echo $REF | sed -e 's|refs/heads/||g' | sed -e 's|[^[:alnum:]]||g' | head -c 20)
           fi
           echo "BASE_HREF=$SUFFIX" >> $GITHUB_ENV
-          echo "::set-output name=branch_suffix::$SUFFIX"
+          echo "::set-output name=branch_ctx::$SUFFIX"
 
       - run: npm ci
 
       - name: Build dist
+        # Trailing base href slash est importante
         run: npm run dist -- --base-href="${{ env.BASE_HREF }}/"
 
       - name: Extract branch name
@@ -154,11 +155,12 @@ jobs:
           helm upgrade --install \
             --set image.tag=${{ env.COMMIT_SHA }} \
             --set backend.url=${{ secrets.BACKEND_SERVICE_URL }} \
-            --set ambassador.branchBase=${{ needs.docker.outputs.branch_suffix }} \
-            --namespace ${{ env.REPO }} \
+            --set ambassador.branchBase=${{ needs.docker.outputs.branch_ctx }} \
+            --set branchContext=${{ needs.docker.outputs.branch_ctx }} \
+            --namespace ${{ env.REPO }}-${{ needs.docker.outputs.branch_ctx }} \
             -f deployment/${{ env.REPO }}/values.yaml \
             -f deployment/secrets/secrets-decrypted.yaml \
-            ${{env.REPO}}-${{ needs.docker.outputs.branch_suffix}} deployment/${{ env.REPO }}
+            ${{env.REPO}}-${{ needs.docker.outputs.branch_ctx}} deployment/${{ env.REPO }}
 
   security:
     needs:
