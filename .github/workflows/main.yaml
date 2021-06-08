@@ -155,8 +155,7 @@ jobs:
           helm upgrade --install \
             --set image.tag=${{ env.COMMIT_SHA }} \
             --set backend.url=${{ secrets.BACKEND_SERVICE_URL }} \
-            --set ambassador.branchBase=${{ needs.docker.outputs.branch_ctx }} \
-            --set branchContext=${{ needs.docker.outputs.branch_ctx }} \
+            --set ambassador.branchBase=/${{ needs.docker.outputs.branch_ctx }} \
             --create-namespace \
             --namespace ${{ env.REPO }}-${{ needs.docker.outputs.branch_ctx }} \
             -f deployment/${{ env.REPO }}/values.yaml \

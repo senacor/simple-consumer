@@ -4,4 +4,4 @@ metadata:
   name:  {{ include "simple-consumer.fullname" . }}
 spec:
   prefix: {{ .Values.ambassador.branchBase }}
-  service: {{ include "simple-consumer.fullname" . }}:8080
+  service: {{ include "simple-consumer.fullname" . }}:80
