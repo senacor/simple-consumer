@@ -60,6 +60,8 @@ jobs:
     needs:
       - test
     runs-on: ubuntu-latest
+    outputs:
+      branch_ctx: ${{ steps.extract_branch_ctx.outputs.branch_ctx }}
     env:
       PUSH_DOCKER_IMAGE: true
       DOCKER_REGISTRY: ghcr.io
@@ -70,18 +72,29 @@ jobs:
         with:
           node-version: "12.x"
 
+      - name: Extract branch context
+        id: extract_branch_ctx
+        run: |
+          REF=${{ github.head_ref || github.ref }}
+          SUFFIX="main"
+          if [ "$REF" != "refs/heads/main" ]; then
+            SUFFIX=$(echo $REF | sed -e 's|refs/heads/||g' | sed -e 's|[^[:alnum:]]||g' | head -c 20)
+          fi
+          echo "BASE_HREF=$SUFFIX" >> $GITHUB_ENV
+          echo "::set-output name=branch_ctx::$SUFFIX"
+
       - run: npm ci
 
       - name: Build dist
-        run: npm run dist
+        # Trailing base href slash est importante
+        run: npm run dist -- --base-href="/${{ env.BASE_HREF }}/"
 
       - name: Extract branch name
         # if: env.GITHUB_HEAD_REF != 'master'
         # git ls-remote --heads -q | grep $(git rev-parse HEAD) | awk '{print $2}' | sed -e 's|refs/heads/||g' | sed -e 's|/|_|g'
         # https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions
         run: |
-          REF=$GITHUB_HEAD_REF
-          [[ -z $REF ]] && REF=$GITHUB_REF
+          REF=${{ github.head_ref || github.ref }}
           echo "BRANCH_TAG=$(echo $REF | sed -e 's|refs/heads/||g' | sed -e 's|/|_|g')" >> $GITHUB_ENV
 
       - name: Extract artifact version
@@ -89,7 +102,6 @@ jobs:
         # https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions
         run: |
           echo "VERSION_TAG=$(jq -r '.version' package.json)" >> $GITHUB_ENV
-
 
       - name: "Docker: Set up QEMU"
         uses: docker/setup-qemu-action@v1
@@ -140,8 +152,15 @@ jobs:
 
           ansible-vault decrypt deployment/secrets/vault --vault-password-file deployment/secrets/ansible-decrypt-pass --output deployment/secrets/secrets-decrypted.yaml
 
-          helm upgrade --install --set image.tag=${{ env.COMMIT_SHA }} --set backend.url=${{ secrets.BACKEND_SERVICE_URL }}  --namespace ${{ env.REPO }} -f deployment/${{ env.REPO }}/values.yaml -f deployment/secrets/secrets-decrypted.yaml ${{ env.REPO }} deployment/${{ env.REPO }}
-
+          helm upgrade --install \
+            --set image.tag=${{ env.COMMIT_SHA }} \
+            --set backend.url=${{ secrets.BACKEND_SERVICE_URL }} \
+            --set ambassador.branchBase=/${{ needs.docker.outputs.branch_ctx }} \
+            --create-namespace \
+            --namespace ${{ env.REPO }}-${{ needs.docker.outputs.branch_ctx }} \
+            -f deployment/${{ env.REPO }}/values.yaml \
+            -f deployment/secrets/secrets-decrypted.yaml \
+            ${{env.REPO}}-${{ needs.docker.outputs.branch_ctx}} deployment/${{ env.REPO }}
   security:
     needs:
       - docker
@@ -154,9 +173,11 @@ jobs:
           node-version: "12.x"
 
       - name: Audit dependencies
+        continue-on-error: true
         run: npx audit-ci --high
 
       - name: Run Trivy vulnerability scanner
+        continue-on-error: true
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: "${{ env.DOCKER_NAME }}:${{ env.COMMIT_SHA }}"
