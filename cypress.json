@@ -1,14 +1,17 @@
 {
-  "integrationFolder": "cypress/integration",
-  "supportFile": "cypress/support/index.ts",
-  "videosFolder": "cypress/videos",
-  "screenshotsFolder": "cypress/screenshots",
-  "pluginsFile": "cypress/plugins/index.js",
-  "fixturesFolder": "cypress/fixtures",
   "baseUrl": "http://localhost:4200",
-  "reporter": "cypress-mochawesome-reporter",
+  "integrationFolder": "uat/features",
+  "testFiles": "**/*.{feature,features}",
+  "supportFile": "cypress/support/index.ts",
+  "videosFolder": "reports/uat/videos",
+  "screenshotsFolder": "reports/uat/screenshots",
+  "pluginsFile": "cypress/plugins/index.js",
+  "fixturesFolder": "uat/fixtures",
+  "blockHosts": [
+    "localhost:8080"
+  ],
   "reporterOptions": {
-    "reportDir": "reports/e2e",
+    "reportDir": "reports/uat",
     "charts": true,
     "reportPageTitle": "Simple Consumer"
   }
